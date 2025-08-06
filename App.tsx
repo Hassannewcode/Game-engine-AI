@@ -1,8 +1,7 @@
-
 import React, { useState, useCallback } from 'react';
 import type { Chat } from '@google/genai';
-import IDEView from './components/IDEView';
-import WorkspaceModal from './components/WorkspaceModal';
+import IDEView from './IDEView'; // Changed from './components/IDEView'
+import WorkspaceModal from './WorkspaceModal'; // Changed from './components/WorkspaceModal'
 import { createAIGameChatSession } from './services/geminiService';
 import type { WorkspaceType } from './types';
 
@@ -19,7 +18,7 @@ const App: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [generatedCode, setGeneratedCode] = useState<string>('');
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-    
+
     const handleSelectWorkspace = useCallback((selectedWorkspace: WorkspaceType) => {
         try {
             const { chat, initialCode, welcomeMessage } = createAIGameChatSession(selectedWorkspace);
@@ -39,11 +38,23 @@ const App: React.FC = () => {
         setIsLoading(true);
         const userMessage: ChatMessage = { id: `user-${Date.now()}`, role: 'user', text: prompt };
         setChatHistory(prev => [...prev, userMessage]);
-        
+
         try {
+            // Ensure the response is handled correctly based on the expected structure from createAIGameChatSession
             const response = await aiChat.sendMessage({ message: prompt });
-            const jsonResponse = JSON.parse(response.text);
-            const { explanation, code } = jsonResponse;
+            // Assuming response.text might be a stringified JSON or plain text
+            let explanation = '';
+            let code = '';
+
+            try {
+                const jsonResponse = JSON.parse(response.text);
+                explanation = jsonResponse.explanation || '';
+                code = jsonResponse.code || '';
+            } catch (parseError) {
+                // If response.text is not JSON, treat it as a direct explanation
+                explanation = response.text;
+            }
+
 
             if (code) {
                 setGeneratedCode(code);
@@ -62,7 +73,7 @@ const App: React.FC = () => {
             setIsLoading(false);
         }
     }, [aiChat, isLoading, workspace]);
-    
+
     const handlePositiveFeedback = useCallback((messageId: string) => {
         setChatHistory(prev => {
             const newHistory = [...prev];
@@ -71,7 +82,7 @@ const App: React.FC = () => {
             if (messageIndex === -1 || newHistory[messageIndex].rated) {
                 return newHistory; // Message not found or already rated
             }
-            
+
             // Mark original message as rated
             newHistory[messageIndex] = { ...newHistory[messageIndex], rated: true };
 
@@ -125,3 +136,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
