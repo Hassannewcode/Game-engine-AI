@@ -104,11 +104,39 @@ const App: React.FC = () => {
 
             newHistory.splice(messageIndex + 1, 0, ...feedbackMessages);
             return newHistory;
-        });
+        }); // Added missing ')' here
     }, []);
 
 
     const handleReset = useCallback(() => {
+        setWorkspace(null);
+        setAiChat(null);
+        setChatHistory([]);
+        setGeneratedCode('');
+        setIsLoading(false);
+    }, []);
+
+    if (!workspace) {
+        return <WorkspaceModal onSelect={handleSelectWorkspace} />;
+    }
+
+    return (
+        <div className="w-screen h-screen bg-black">
+            <IDEView
+                workspaceType={workspace}
+                generatedCode={generatedCode}
+                chatHistory={chatHistory}
+                isLoading={isLoading}
+                onGenerate={handleGenerateCode}
+                onReset={handleReset}
+                onPositiveFeedback={handlePositiveFeedback}
+            />
+        </div>
+    );
+};
+
+export default App;
+
         setWorkspace(null);
         setAiChat(null);
         setChatHistory([]);
