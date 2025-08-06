@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import type { Chat } from '@google/genai';
-import IDEView from './IDEView'; // Changed from './components/IDEView'
-import WorkspaceModal from './WorkspaceModal'; // Changed from './components/WorkspaceModal'
-import { createAIGameChatSession } from './services/geminiService';
+import IDEView from './IDEView';
+import WorkspaceModal from './WorkspaceModal';
+import { createAIGameChatSession } from './geminiService'; // Corrected import path
 import type { WorkspaceType } from './types';
 
 export interface ChatMessage {
@@ -110,6 +110,33 @@ const App: React.FC = () => {
 
     const handleReset = useCallback(() => {
         setWorkspace(null);
+        setAiChat(null);
+        setChatHistory([]);
+        setGeneratedCode('');
+        setIsLoading(false);
+    }, []);
+
+    if (!workspace) {
+        return <WorkspaceModal onSelect={handleSelectWorkspace} />;
+    }
+
+    return (
+        <div className="w-screen h-screen bg-black">
+            <IDEView
+                workspaceType={workspace}
+                generatedCode={generatedCode}
+                chatHistory={chatHistory}
+                isLoading={isLoading}
+                onGenerate={handleGenerateCode}
+                onReset={handleReset}
+                onPositiveFeedback={handlePositiveFeedback}
+            />
+        </div>
+    );
+};
+
+export default App;
+
         setAiChat(null);
         setChatHistory([]);
         setGeneratedCode('');
